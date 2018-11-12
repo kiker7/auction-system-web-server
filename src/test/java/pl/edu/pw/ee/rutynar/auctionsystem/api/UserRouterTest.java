@@ -17,7 +17,7 @@ import java.util.List;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureWebTestClient
-public class UserRouterTest {
+class UserRouterTest {
 
     @Autowired
     private WebTestClient client;
@@ -67,4 +67,6 @@ public class UserRouterTest {
                 .expectBody(User.class)
                 .isEqualTo(expectedUser);
     }
+
+    //TODO: post, put, delete
 }
