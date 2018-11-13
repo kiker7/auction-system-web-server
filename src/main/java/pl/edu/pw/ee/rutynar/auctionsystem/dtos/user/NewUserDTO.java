@@ -19,7 +19,7 @@ public class NewUserDTO {
     @EqualsAndHashCode.Include
     @NotBlank
     @NonExistingLogin
-    private String login;
+    private String username;
 
     @Email
     @NotBlank

@@ -17,7 +17,7 @@ public class NonExistingLoginValidator implements ConstraintValidator<NonExistin
     @Override
     public boolean isValid(String login, ConstraintValidatorContext constraintValidatorContext) {
 
-        return !userRepository.findByLogin(login).blockOptional().isPresent();
+        return !userRepository.findByUsername(login).blockOptional().isPresent();
     }
 
     @Override

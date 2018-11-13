@@ -2,10 +2,12 @@ package pl.edu.pw.ee.rutynar.auctionsystem.config.security;
 
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
 import java.util.Base64;
 
+@Component
 public class CustomPasswordEncoder implements PasswordEncoder {
 
     @Override

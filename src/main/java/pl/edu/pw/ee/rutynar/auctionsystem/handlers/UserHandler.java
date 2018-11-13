@@ -1,5 +1,6 @@
 package pl.edu.pw.ee.rutynar.auctionsystem.handlers;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,7 @@ public class UserHandler {
     private UserRepository userRepository;
 
     public Mono<ServerResponse> getUser(ServerRequest request) {
-        String id = request.pathVariable("id");
+        ObjectId id = new ObjectId(request.pathVariable("id"));
 
         Mono<User> userMono = userRepository.findById(id);
         return userMono
