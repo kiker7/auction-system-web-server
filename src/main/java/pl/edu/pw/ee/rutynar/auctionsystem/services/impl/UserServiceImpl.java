@@ -1,8 +1,12 @@
 package pl.edu.pw.ee.rutynar.auctionsystem.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Service;
 import pl.edu.pw.ee.rutynar.auctionsystem.config.security.CustomPasswordEncoder;
+import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Game;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Library;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Role;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.User;
@@ -44,5 +48,19 @@ public class UserServiceImpl implements UserService {
                     u.setLibrary(lib);
                     return u;
                 }).flatMap(u -> userRepository.save(u));
+    }
+
+    @Override
+    public Mono<Game> getUserGamesFromLibrary(User user) {
+        return null;
+    }
+
+    @Override
+    public Mono<User> getCurrentUser() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .map(Authentication::getPrincipal)
+                .map(object -> (String) object)
+                .flatMap(username -> userRepository.findUserByUsername(username));
     }
 }
