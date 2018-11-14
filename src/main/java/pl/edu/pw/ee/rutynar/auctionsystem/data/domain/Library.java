@@ -19,8 +19,5 @@ public class Library {
     private ObjectId id;
 
     @DBRef
-    private User owner;
-
-    @DBRef
     private List<Game> games;
 }

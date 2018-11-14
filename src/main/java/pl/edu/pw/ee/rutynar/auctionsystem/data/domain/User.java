@@ -3,6 +3,7 @@ package pl.edu.pw.ee.rutynar.auctionsystem.data.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -21,7 +22,7 @@ import java.util.List;
 @ToString(onlyExplicitlyIncluded = true)
 @Document
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+//@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User implements UserDetails {
 
     @EqualsAndHashCode.Include
