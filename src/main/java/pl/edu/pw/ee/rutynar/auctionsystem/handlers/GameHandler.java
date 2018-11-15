@@ -1,6 +1,7 @@
 package pl.edu.pw.ee.rutynar.auctionsystem.handlers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 
 @Slf4j
 @Component
@@ -49,5 +51,15 @@ public class GameHandler {
                                 .contentType(APPLICATION_JSON)
                                 .body(lib, Library.class)
                 );
+    }
+
+    public Mono<ServerResponse> getGame(ServerRequest request){
+        ObjectId gameId = new ObjectId(request.pathVariable("id"));
+
+        return gameRepository.findById(gameId)
+                .flatMap(game ->
+                        ServerResponse.ok()
+                        .contentType(APPLICATION_JSON)
+                        .body(fromObject(game)));
     }
 }

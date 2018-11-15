@@ -11,8 +11,6 @@ public interface UserService {
 
     Mono<User> createUserFromForm(NewUserDTO userDTO);
 
-    Flux<Game> getUserGamesFromLibrary(User user);
-
     Mono<User> getCurrentUser();
 
     Mono<Void> deleteUser(User user);

@@ -8,5 +8,4 @@ import reactor.core.publisher.Flux;
 
 public interface GameRepository extends ReactiveMongoRepository<Game, ObjectId> {
 
-    Flux<Game> findAllByLibrary(Library library);
 }

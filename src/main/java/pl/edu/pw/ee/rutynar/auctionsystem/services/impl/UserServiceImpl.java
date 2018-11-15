@@ -50,15 +50,9 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.save(user)
                 .zipWith(libraryRepository.save(new Library()), (u, lib) -> {
-                    lib.setGames(new ArrayList<>());
                     u.setLibrary(lib);
                     return u;
                 }).flatMap(u -> userRepository.save(u));
-    }
-
-    @Override
-    public Flux<Game> getUserGamesFromLibrary(User user) {
-        return gameRepository.findAllByLibrary(user.getLibrary());
     }
 
     @Override

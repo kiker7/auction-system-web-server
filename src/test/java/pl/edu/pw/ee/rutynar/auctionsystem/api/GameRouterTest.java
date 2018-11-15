@@ -23,7 +23,7 @@ import static org.springframework.web.reactive.function.BodyInserters.fromObject
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureWebTestClient
-public class GameRouterTest {
+class GameRouterTest {
 
     @Autowired
     private WebTestClient client;
@@ -34,10 +34,13 @@ public class GameRouterTest {
     @Autowired
     private JwtTokenUtil tokenUtil;
 
+    private Game expectedGame;
+
     @BeforeEach
     void beforeEach() {
-        List<User> expectedList = userRepository.findAll().collectList().block();
-        String token = tokenUtil.generateToken(expectedList.size() > 0 ? expectedList.get(0) : null);
+        List<User> userList = userRepository.findAll().collectList().block();
+        String token = tokenUtil.generateToken(userList.size() > 0 ? userList.get(0) : null);
+        expectedGame = userList.get(0).getLibrary().getGames().get(0);
 
         this.client = this.client.mutate()
                 .baseUrl("/api/game")
@@ -68,12 +71,23 @@ public class GameRouterTest {
 
     @Test
     void testGetGame(){
-
+        client
+                .get()
+                .uri("/{id}", expectedGame.getId())
+                .exchange()
+                .expectBody()
+                .jsonPath("$.name")
+                .isEqualTo(expectedGame.getName());
     }
 
     @Test
     void testGameNotFound(){
-
+        client
+                .get()
+                .uri("/{id}", "5436543543543")
+                .exchange()
+                .expectStatus()
+                .isNotFound();
     }
 
     @Test
