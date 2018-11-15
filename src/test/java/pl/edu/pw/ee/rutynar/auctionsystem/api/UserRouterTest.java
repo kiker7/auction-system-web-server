@@ -133,5 +133,16 @@ class UserRouterTest {
                 .isEqualTo(user);
     }
 
+    @Test
+    void testUserDelete(){
+        User user = expectedList.get(0);
+
+        client
+                .delete()
+                .uri("/{id}", user.getId())
+                .exchange()
+                .expectBody()
+                .isEmpty();
+    }
 
 }

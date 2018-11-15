@@ -21,6 +21,7 @@ public class UserRouter {
         return route(GET("/api/user").and(accept(APPLICATION_JSON)), userHandler::getAllUsers)
                 .andRoute(GET("/api/user/{id}").and(accept(APPLICATION_JSON)), userHandler::getUser)
                 .andRoute(PUT("/api/user/{id}").and(contentType(APPLICATION_JSON)), userHandler::updateUser)
+                .andRoute(DELETE("/api/user/{id}").and(accept(APPLICATION_JSON)), userHandler::deleteUser)
                 .andRoute(GET("/api/user/{id}/library").and(accept(APPLICATION_JSON)), userHandler::getUserLibrary);
     }
 

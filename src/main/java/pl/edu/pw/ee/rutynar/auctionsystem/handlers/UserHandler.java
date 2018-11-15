@@ -75,11 +75,6 @@ public class UserHandler {
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 
-    public Mono<ServerResponse> deleteUser(ServerRequest request) {
-
-        return null;
-    }
-
     public Mono<ServerResponse> getUserLibrary(ServerRequest request) {
         ObjectId id = new ObjectId(request.pathVariable("id"));
 
@@ -90,6 +85,18 @@ public class UserHandler {
                                     .contentType(APPLICATION_JSON)
                                     .body(fromObject(games)))
                 .next()
+                .switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    public Mono<ServerResponse> deleteUser(ServerRequest request){
+        ObjectId objectId = new ObjectId(request.pathVariable("id"));
+
+        Mono<User> userMono = userRepository.findById(objectId);
+
+        return userMono
+                .flatMap(user -> ServerResponse
+                                    .ok()
+                                    .build(userRepository.delete(user)))
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 }
