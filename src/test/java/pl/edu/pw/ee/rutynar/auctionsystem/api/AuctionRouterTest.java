@@ -46,6 +46,8 @@ class AuctionRouterTest {
 
     private Auction expectedAuction;
 
+    private List<Auction> userAuctions;
+
     private List<Bid> expectedBids;
 
     private List<User> userList;
@@ -55,7 +57,8 @@ class AuctionRouterTest {
         userList = userRepository.findAll().collectList().block();
         String token = tokenUtil.generateToken(userList.size() > 0 ? userList.get(0) : null);
         auctionGame = userList.get(0).getLibrary().getGames().get(0);
-        expectedAuction = auctionRepository.findAuctionByOwner(userList.get(0)).block();
+        userAuctions = auctionRepository.findAuctionByOwner(userList.get(0)).collectList().block();
+        expectedAuction = userAuctions.get(0);
         expectedBids = bidRepository.findAllByUser(userList.get(0)).collectList().block();
 
         this.client = this.client.mutate()
@@ -63,25 +66,6 @@ class AuctionRouterTest {
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .build();
-    }
-
-    @Test
-    void testPostAuction() {
-        Auction auction = new Auction();
-        // Handler sets owner
-        auction.setClosingTime(new Date());
-        auction.setFinished(false);
-        auction.setGame(auctionGame);
-
-        client
-                .post()
-                .uri("/")
-                .contentType(APPLICATION_JSON)
-                .body(fromObject(auction))
-                .exchange()
-                .expectBody()
-                .jsonPath("$.game.name")
-                .isEqualTo(auctionGame.getName());
     }
 
     @Test
@@ -98,7 +82,7 @@ class AuctionRouterTest {
     void testAuctionNotFound() {
         client
                 .get()
-                .uri("/{id}", "13dsfdsf32")
+                .uri("/{id}", "5bedf975037919637e014fa1")
                 .exchange()
                 .expectStatus()
                 .isNotFound();

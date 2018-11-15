@@ -11,10 +11,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import pl.edu.pw.ee.rutynar.auctionsystem.config.security.JwtTokenUtil;
+import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Auction;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Game;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.User;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.UserRepository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -112,6 +114,21 @@ class GameRouterTest {
                 .exchange()
                 .expectBody()
                 .isEmpty();
+    }
+
+    @Test
+    void testPostGameAuction(){
+        Auction auction = new Auction();
+        auction.setFinished(false);
+        auction.setClosingTime(new Date());
+
+        client
+                .post()
+                .uri("/{id}/add-auction",expectedGame.getId())
+                .body(fromObject(auction))
+                .exchange()
+                .expectStatus()
+                .isCreated();
     }
 
     // TODO:: testGetGameAuction()

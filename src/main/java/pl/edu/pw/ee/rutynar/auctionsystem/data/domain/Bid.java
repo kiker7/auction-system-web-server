@@ -1,5 +1,7 @@
 package pl.edu.pw.ee.rutynar.auctionsystem.data.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.bson.types.ObjectId;
@@ -15,6 +17,7 @@ import java.util.Date;
 @Document
 public class Bid {
 
+    @JsonSerialize(using = ToStringSerializer.class)
     @EqualsAndHashCode.Include
     @Id
     private ObjectId id;

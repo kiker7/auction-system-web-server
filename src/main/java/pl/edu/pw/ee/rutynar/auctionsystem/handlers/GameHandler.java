@@ -2,17 +2,17 @@ package pl.edu.pw.ee.rutynar.auctionsystem.handlers;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.connection.Server;
-import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Auction;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Game;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Library;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.User;
+import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.AuctionRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.GameRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.LibraryRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.services.UserService;
@@ -20,11 +20,11 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 
-@Slf4j
 @Component
 public class GameHandler {
 
@@ -36,6 +36,9 @@ public class GameHandler {
 
     @Autowired
     private GameRepository gameRepository;
+
+    @Autowired
+    private AuctionRepository auctionRepository;
 
     public Mono<ServerResponse> postNewGame(ServerRequest request) {
         Mono<User> userMono = userService.getCurrentUser();
@@ -99,6 +102,28 @@ public class GameHandler {
                 .flatMap(game ->
                         ServerResponse.ok()
                                 .build(gameRepository.delete(game)))
+                .switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    public Mono<ServerResponse> postGameAuction(ServerRequest request) {
+
+        ObjectId gameId = new ObjectId(request.pathVariable("id"));
+        Mono<Auction> auctionMono = request.bodyToMono(Auction.class);
+        Mono<Game> gameMono = gameRepository.findById(gameId);
+        Mono<User> userMono = userService.getCurrentUser();
+
+        return gameMono
+                .zipWith(auctionMono, (game, auction) -> {
+                    auction.setGame(game);
+                    auction.setClosingTime(new Date());
+                    auction.setFinished(false);
+                    return auction;
+                }).zipWith(userMono, (auction, user) -> {
+                    auction.setOwner(user);
+                    return auctionRepository.save(auction);
+                }).flatMap(auctionM -> ServerResponse.status(HttpStatus.CREATED)
+                        .contentType(APPLICATION_JSON)
+                        .body(auctionM, Auction.class))
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 }

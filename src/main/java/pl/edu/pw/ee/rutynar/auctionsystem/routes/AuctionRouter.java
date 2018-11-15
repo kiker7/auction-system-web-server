@@ -16,8 +16,7 @@ public class AuctionRouter {
     @Bean
     public RouterFunction<ServerResponse> auctionRoutes(AuctionHandler auctionHandler){
 
-        return route(POST("/api/auction").and(contentType(APPLICATION_JSON)), auctionHandler::postAuction)
-                .andRoute(GET("/api/auction/{id}").and(accept(APPLICATION_JSON)), auctionHandler::getAuction)
+        return route(GET("/api/auction/{id}").and(accept(APPLICATION_JSON)), auctionHandler::getAuction)
                 .andRoute(PUT("/api/auction/{id}").and(contentType(APPLICATION_JSON)), auctionHandler::updateAuction)
                 .andRoute(DELETE("/api/auction/{id}").and(accept(APPLICATION_JSON)), auctionHandler::deleteAuction)
                 .andRoute(GET("/api/auction/{id}/bids").and(accept(APPLICATION_JSON)), auctionHandler::getAuctionBids)
