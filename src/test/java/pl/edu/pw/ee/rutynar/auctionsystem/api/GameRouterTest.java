@@ -92,11 +92,25 @@ class GameRouterTest {
 
     @Test
     void testUpdateGame(){
+        // Change name
+        expectedGame.setName("New Updated Name");
 
+        client
+                .put()
+                .uri("/{id}", expectedGame.getId())
+                .body(fromObject(expectedGame))
+                .exchange()
+                .expectBody(Game.class)
+                .isEqualTo(expectedGame);
     }
 
     @Test
     void testDeleteGame(){
-
+        client
+                .delete()
+                .uri("/{id}",expectedGame.getId())
+                .exchange()
+                .expectBody()
+                .isEmpty();
     }
 }

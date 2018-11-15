@@ -17,6 +17,8 @@ public class GameRouter {
     public RouterFunction<ServerResponse> gameRoutes(GameHandler gameHandler){
 
         return route(POST("/api/game").and(contentType(APPLICATION_JSON)), gameHandler::postNewGame)
-                .andRoute(GET("/api/game/{id}").and(accept(APPLICATION_JSON)), gameHandler::getGame);
+                .andRoute(GET("/api/game/{id}").and(accept(APPLICATION_JSON)), gameHandler::getGame)
+                .andRoute(PUT("/api/game/{id}").and(contentType(APPLICATION_JSON)), gameHandler::updateGame)
+                .andRoute(DELETE("/api/game/{id}").and(accept(APPLICATION_JSON)), gameHandler::deleteGame);
     }
 }

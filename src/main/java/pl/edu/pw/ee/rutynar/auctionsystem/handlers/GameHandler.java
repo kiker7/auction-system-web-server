@@ -1,5 +1,8 @@
 package pl.edu.pw.ee.rutynar.auctionsystem.handlers;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.connection.Server;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.LibraryRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.services.UserService;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -53,13 +57,48 @@ public class GameHandler {
                 );
     }
 
-    public Mono<ServerResponse> getGame(ServerRequest request){
+    public Mono<ServerResponse> getGame(ServerRequest request) {
         ObjectId gameId = new ObjectId(request.pathVariable("id"));
 
         return gameRepository.findById(gameId)
                 .flatMap(game ->
                         ServerResponse.ok()
-                        .contentType(APPLICATION_JSON)
-                        .body(fromObject(game)));
+                                .contentType(APPLICATION_JSON)
+                                .body(fromObject(game)));
+    }
+
+    public Mono<ServerResponse> updateGame(ServerRequest request) {
+        ObjectId id = new ObjectId(request.pathVariable("id"));
+
+        Mono<Game> existingGameMono = gameRepository.findById(id);
+        Mono<Game> updatedGameMono = request.bodyToMono(Game.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        return updatedGameMono.zipWith(existingGameMono,
+                (updatedGame, existingGame) -> {
+                    try {
+                        return objectMapper.readValue(objectMapper.writeValueAsString(updatedGame), Game.class);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return updatedGame;
+                })
+                .flatMap(game ->
+                        ServerResponse.ok()
+                                .contentType(APPLICATION_JSON)
+                                .body(gameRepository.save(game), Game.class)
+                ).switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    public Mono<ServerResponse> deleteGame(ServerRequest request) {
+        ObjectId id = new ObjectId(request.pathVariable("id"));
+        Mono<Game> gameMono = gameRepository.findById(id);
+
+        return gameMono
+                .flatMap(game ->
+                        ServerResponse.ok()
+                                .build(gameRepository.delete(game)))
+                .switchIfEmpty(ServerResponse.notFound().build());
     }
 }

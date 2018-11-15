@@ -28,9 +28,6 @@ public class UserHandler {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private GameRepository gameRepository;
-
     public Mono<ServerResponse> getUser(ServerRequest request) {
         ObjectId id = new ObjectId(request.pathVariable("id"));
 
