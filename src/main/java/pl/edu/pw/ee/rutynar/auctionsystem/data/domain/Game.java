@@ -26,7 +26,6 @@ public class Game {
 
     private Library library;
 
-    @DBRef
     private Auction auction;
 
 }

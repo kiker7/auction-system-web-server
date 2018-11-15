@@ -25,8 +25,5 @@ public class Bid {
     private Date requestTime;
 
     @DBRef
-    private Auction auction;
-
-    @DBRef
     private User user;
 }
