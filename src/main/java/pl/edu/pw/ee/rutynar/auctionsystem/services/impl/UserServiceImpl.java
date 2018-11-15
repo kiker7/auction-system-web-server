@@ -10,13 +10,14 @@ import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Game;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Library;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Role;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.User;
+import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.GameRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.LibraryRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.UserRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.dtos.user.NewUserDTO;
 import pl.edu.pw.ee.rutynar.auctionsystem.services.UserService;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.Collections;
 
 @Service
@@ -30,6 +31,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private CustomPasswordEncoder customPasswordEncoder;
+
+    @Autowired
+    private GameRepository gameRepository;
 
     @Override
     public Mono<User> createUserFromForm(NewUserDTO userDTO) {
@@ -51,8 +55,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Mono<Game> getUserGamesFromLibrary(User user) {
-        return null;
+    public Flux<Game> getUserGamesFromLibrary(User user) {
+        return gameRepository.findAllByLibrary(user.getLibrary());
     }
 
     @Override

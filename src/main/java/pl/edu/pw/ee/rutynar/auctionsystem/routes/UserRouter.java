@@ -19,7 +19,9 @@ public class UserRouter {
     @Bean
     public RouterFunction<ServerResponse> userRoutes(UserHandler userHandler) {
         return route(GET("/api/user").and(accept(APPLICATION_JSON)), userHandler::getAllUsers)
-                .andRoute(GET("/api/user/{id}").and(accept(APPLICATION_JSON)), userHandler::getUser);
+                .andRoute(GET("/api/user/{id}").and(accept(APPLICATION_JSON)), userHandler::getUser)
+                .andRoute(PUT("/api/user/{id}").and(contentType(APPLICATION_JSON)), userHandler::updateUser)
+                .andRoute(GET("/api/user/{id}/library").and(accept(APPLICATION_JSON)), userHandler::getUserLibrary);
     }
 
     @Bean

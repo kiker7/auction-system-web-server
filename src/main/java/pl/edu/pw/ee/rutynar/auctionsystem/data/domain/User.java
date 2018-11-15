@@ -22,7 +22,7 @@ import java.util.List;
 @ToString(onlyExplicitlyIncluded = true)
 @Document
 @JsonIgnoreProperties(ignoreUnknown = true)
-//@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User implements UserDetails {
 
     @EqualsAndHashCode.Include
@@ -64,6 +64,7 @@ public class User implements UserDetails {
     @DBRef
     private List<Auction> followedAuctions;
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>(this.roles.size());

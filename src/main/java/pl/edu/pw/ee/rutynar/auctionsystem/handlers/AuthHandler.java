@@ -17,7 +17,6 @@ import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.User;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.UserRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.dtos.user.NewUserDTO;
 import pl.edu.pw.ee.rutynar.auctionsystem.services.UserService;
-import pl.edu.pw.ee.rutynar.auctionsystem.services.impl.UserServiceImpl;
 import reactor.core.publisher.Mono;
 
 @Component
