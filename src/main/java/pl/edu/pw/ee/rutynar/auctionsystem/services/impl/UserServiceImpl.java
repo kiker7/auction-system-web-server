@@ -18,6 +18,7 @@ import pl.edu.pw.ee.rutynar.auctionsystem.services.UserService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Collections;
 
 @Service
@@ -49,6 +50,7 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.save(user)
                 .zipWith(libraryRepository.save(new Library()), (u, lib) -> {
+                    lib.setGames(new ArrayList<>());
                     u.setLibrary(lib);
                     return u;
                 }).flatMap(u -> userRepository.save(u));
@@ -66,5 +68,13 @@ public class UserServiceImpl implements UserService {
                 .map(Authentication::getPrincipal)
                 .map(object -> (String) object)
                 .flatMap(username -> userRepository.findUserByUsername(username));
+    }
+
+    @Override
+    public Mono<Void> deleteUser(User user) {
+
+        // TODO: cleanup library, games and auctions
+
+        return userRepository.delete(user);
     }
 }

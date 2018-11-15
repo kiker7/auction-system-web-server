@@ -31,8 +31,6 @@ public class Auction {
     @DBRef
     private List<Bid> bids;
 
-    @DBRef
-    private Game game;
 
     @DBRef
     private List<User> followers;

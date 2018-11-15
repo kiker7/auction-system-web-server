@@ -96,7 +96,7 @@ public class UserHandler {
         return userMono
                 .flatMap(user -> ServerResponse
                                     .ok()
-                                    .build(userRepository.delete(user)))
+                                    .build(userService.deleteUser(user)))
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 }
