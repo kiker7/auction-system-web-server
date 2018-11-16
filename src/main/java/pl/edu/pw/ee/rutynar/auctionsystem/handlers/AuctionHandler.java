@@ -97,8 +97,22 @@ public class AuctionHandler {
     }
 
     public Mono<ServerResponse> addAuctionFollower(ServerRequest request) {
+        ObjectId auctionId = new ObjectId(request.pathVariable("id"));
 
-        return null;
+        Mono<Auction> auctionMono = auctionRepository.findById(auctionId);
+        Mono<User> userMono = userService.getCurrentUser();
+
+        return auctionMono
+                .zipWith(userMono, (auction, user) -> {
+                    if(!auction.getFollowers().contains(user)){
+                        auction.getFollowers().add(user);
+                    }
+                    return auctionRepository.save(auction);
+                })
+                .flatMap(auction -> ServerResponse.ok()
+                            .contentType(APPLICATION_JSON)
+                            .body(auction, Auction.class)
+                ).switchIfEmpty(ServerResponse.notFound().build());
     }
 
     public Mono<ServerResponse> getAuctionBids(ServerRequest request) {

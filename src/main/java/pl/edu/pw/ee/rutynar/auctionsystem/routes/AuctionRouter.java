@@ -21,6 +21,6 @@ public class AuctionRouter {
                 .andRoute(DELETE("/api/auction/{id}").and(accept(APPLICATION_JSON)), auctionHandler::deleteAuction)
                 .andRoute(GET("/api/auction/{id}/bids").and(accept(APPLICATION_JSON)), auctionHandler::getAuctionBids)
                 .andRoute(POST("/api/auction/{id}/set-bid").and(contentType(APPLICATION_JSON)), auctionHandler::addAuctionBid)
-                .andRoute(POST("/api/auction/{id}/add-follower/{userId}").and(contentType(APPLICATION_JSON)), auctionHandler::addAuctionFollower);
+                .andRoute(POST("/api/auction/{id}/add-follower").and(contentType(APPLICATION_JSON)), auctionHandler::addAuctionFollower);
     }
 }

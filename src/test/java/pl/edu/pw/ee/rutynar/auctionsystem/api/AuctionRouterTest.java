@@ -58,7 +58,7 @@ class AuctionRouterTest {
         String token = tokenUtil.generateToken(userList.size() > 0 ? userList.get(0) : null);
         auctionGame = userList.get(0).getLibrary().getGames().get(0);
         userAuctions = auctionRepository.findAuctionByOwner(userList.get(0)).collectList().block();
-        expectedAuction = userAuctions.get(0);
+        expectedAuction = userAuctions.get(1);
         expectedBids = bidRepository.findAllByUser(userList.get(0)).collectList().block();
 
         this.client = this.client.mutate()
@@ -143,14 +143,14 @@ class AuctionRouterTest {
 
     @Test
     void testAddFollowerToAuction() {
-        User newFollower = userList.get(1);
 
         client
                 .post()
-                .uri("/{id}/add-follower/{userId}", expectedAuction.getId(), newFollower.getId())
+                .uri("/{id}/add-follower", expectedAuction.getId())
                 .exchange()
-                .expectBodyList(User.class)
-                .isEqualTo(expectedAuction.getFollowers());
+                .expectBody()
+                .jsonPath("$.followers[:1].username")
+                .isEqualTo(userList.get(0).getUsername());
     }
 
     @Test
