@@ -65,6 +65,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getCurrentUserObject() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .map(Authentication::getPrincipal)
+                .map(object -> (String) object)
+                .flatMap(username -> userRepository.findUserByUsername(username)).block();
+    }
+
+    @Override
     public Mono<Void> deleteUser(User user) {
 
         // TODO: cleanup library, games and auctions

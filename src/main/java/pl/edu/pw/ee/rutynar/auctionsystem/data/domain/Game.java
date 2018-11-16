@@ -30,5 +30,4 @@ public class Game {
     private Library library;
 
     private Auction auction;
-
 }

@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.server.ResponseStatusException;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Auction;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Game;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Library;
@@ -21,8 +22,10 @@ import reactor.core.publisher.Mono;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 
 @Component
@@ -67,7 +70,8 @@ public class GameHandler {
                 .flatMap(game ->
                         ServerResponse.ok()
                                 .contentType(APPLICATION_JSON)
-                                .body(fromObject(game)));
+                                .body(fromObject(game)))
+                .switchIfEmpty(ServerResponse.notFound().build());
     }
 
     public Mono<ServerResponse> updateGame(ServerRequest request) {
@@ -112,18 +116,34 @@ public class GameHandler {
         Mono<Game> gameMono = gameRepository.findById(gameId);
         Mono<User> userMono = userService.getCurrentUser();
 
-        return gameMono
-                .zipWith(auctionMono, (game, auction) -> {
-                    auction.setGame(game);
-                    auction.setClosingTime(new Date());
-                    auction.setFinished(false);
-                    return auction;
-                }).zipWith(userMono, (auction, user) -> {
+        return auctionMono
+                .zipWith(userMono, (auction, user) -> {
                     auction.setOwner(user);
-                    return auctionRepository.save(auction);
-                }).flatMap(auctionM -> ServerResponse.status(HttpStatus.CREATED)
+                    if (auction.getFollowers() == null) {
+                        auction.setFollowers(new ArrayList<>());
+                    }
+                    auction.getFollowers().add(user);
+                    return auction;
+                })
+                .zipWith(gameMono, (auction, game) -> auctionRepository.findAuctionByGame(game)
+                        .hasElement()
+                        .flatMap(val -> {
+                            if (val) {
+                                return Mono.just(auction);
+                            } else {
+                                auction.setGame(game);
+                                auction.setClosingTime(new Date());
+                                auction.setFinished(false);
+                                return auctionRepository.save(auction);
+                            }
+                        }))
+                .flatMap(auctionM -> auctionM.map(auction -> auction))
+                .filter(auction -> auction.getId() != null)
+                .flatMap(auction -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(APPLICATION_JSON)
-                        .body(auctionM, Auction.class))
-                .switchIfEmpty(ServerResponse.notFound().build());
+                        .body(fromObject(auction))
+                ).switchIfEmpty(ServerResponse.status(HttpStatus.BAD_REQUEST)
+                        .contentType(TEXT_PLAIN)
+                        .body(fromObject("Auction already exists")));
     }
 }

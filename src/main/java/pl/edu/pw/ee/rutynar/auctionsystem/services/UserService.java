@@ -13,5 +13,7 @@ public interface UserService {
 
     Mono<User> getCurrentUser();
 
+    User getCurrentUserObject();
+
     Mono<Void> deleteUser(User user);
 }

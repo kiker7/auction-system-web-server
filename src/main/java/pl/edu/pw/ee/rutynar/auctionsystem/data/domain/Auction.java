@@ -28,6 +28,7 @@ public class Auction {
 
     private boolean finished;
 
+    @JsonSerialize(using = ToStringSerializer.class)
     @DBRef
     private User owner;
 
@@ -37,6 +38,7 @@ public class Auction {
     @DBRef
     private List<Bid> bids;
 
+    @JsonSerialize(using = ToStringSerializer.class)
     @DBRef
     private List<User> followers;
 }
