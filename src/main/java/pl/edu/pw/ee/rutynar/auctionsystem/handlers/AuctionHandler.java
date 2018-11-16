@@ -1,5 +1,8 @@
 package pl.edu.pw.ee.rutynar.auctionsystem.handlers;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.connection.Server;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,6 +13,8 @@ import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.User;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.AuctionRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.services.UserService;
 import reactor.core.publisher.Mono;
+
+import java.io.IOException;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
@@ -36,12 +41,24 @@ public class AuctionHandler {
 
     public Mono<ServerResponse> updateAuction(ServerRequest request){
 
-        return null;
-    }
+        ObjectId auctionId = new ObjectId(request.pathVariable("id"));
+        Mono<Auction> updatedAuctionMono = request.bodyToMono(Auction.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    public Mono<ServerResponse> deleteAuction(ServerRequest request){
-
-        return null;
+        return updatedAuctionMono.zipWith(auctionRepository.findById(auctionId),
+                (updatedAuction, auction) -> {
+                    try{
+                        return objectMapper.readValue(objectMapper.writeValueAsString(updatedAuction), Auction.class);
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }
+                    return auction;
+                }).flatMap(auction ->
+                        ServerResponse.ok()
+                            .contentType(APPLICATION_JSON)
+                            .body(auctionRepository.save(auction), Auction.class)
+            ).switchIfEmpty(ServerResponse.notFound().build());
     }
 
     public Mono<ServerResponse> addAuctionBid(ServerRequest request){
@@ -56,6 +73,11 @@ public class AuctionHandler {
 
     public Mono<ServerResponse> getAuctionBids(ServerRequest request){
 
+        return null;
+    }
+
+    // For now auctions won't be deleted
+    public Mono<ServerResponse> deleteAuction(ServerRequest request){
         return null;
     }
 }
