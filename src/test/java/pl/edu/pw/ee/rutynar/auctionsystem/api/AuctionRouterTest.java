@@ -58,7 +58,7 @@ class AuctionRouterTest {
         String token = tokenUtil.generateToken(userList.size() > 0 ? userList.get(0) : null);
         auctionGame = userList.get(0).getLibrary().getGames().get(0);
         userAuctions = auctionRepository.findAuctionByOwner(userList.get(0)).collectList().block();
-        expectedAuction = userAuctions.get(1);
+        expectedAuction = userAuctions.get(0);
         expectedBids = bidRepository.findAllByUser(userList.get(0)).collectList().block();
 
         this.client = this.client.mutate()
@@ -158,7 +158,7 @@ class AuctionRouterTest {
 
         client
                 .get()
-                .uri("/{id}/bids")
+                .uri("/{id}/bids", expectedAuction.getId())
                 .exchange()
                 .expectBodyList(Bid.class)
                 .isEqualTo(expectedBids);

@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
@@ -116,8 +117,16 @@ public class AuctionHandler {
     }
 
     public Mono<ServerResponse> getAuctionBids(ServerRequest request) {
+        ObjectId auctionId = new ObjectId(request.pathVariable("id"));
 
-        return null;
+        Mono<Auction> auctionMono = auctionRepository.findById(auctionId);
+
+        return auctionMono
+                .filter(auction -> auction.getBids() != null)
+                .flatMap(bids -> ServerResponse.ok()
+                    .contentType(APPLICATION_JSON)
+                    .body(fromObject(bids))
+                ).switchIfEmpty(ServerResponse.notFound().build());
     }
 
     // For now auctions won't be deleted

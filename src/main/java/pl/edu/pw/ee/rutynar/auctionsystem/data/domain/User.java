@@ -59,6 +59,7 @@ public class User implements UserDetails {
     @Setter
     private boolean enabled;
 
+    @JsonIgnore
     @Getter @Setter
     @DBRef
     private Library library;

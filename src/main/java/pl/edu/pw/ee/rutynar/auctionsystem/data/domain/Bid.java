@@ -1,5 +1,6 @@
 package pl.edu.pw.ee.rutynar.auctionsystem.data.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
@@ -27,6 +28,7 @@ public class Bid {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date requestTime;
 
+    @JsonIgnore
     @DBRef
     private User user;
 }
