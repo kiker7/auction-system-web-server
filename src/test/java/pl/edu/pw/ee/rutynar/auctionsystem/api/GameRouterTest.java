@@ -15,7 +15,9 @@ import pl.edu.pw.ee.rutynar.auctionsystem.config.security.JwtTokenUtil;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Auction;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Game;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.User;
+import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.AuctionRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.UserRepository;
+import reactor.core.publisher.Mono;
 
 import java.util.Date;
 import java.util.List;
@@ -33,6 +35,9 @@ class GameRouterTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AuctionRepository auctionRepository;
 
     @Autowired
     private JwtTokenUtil tokenUtil;
@@ -134,12 +139,12 @@ class GameRouterTest {
 
     @Test
     void testPostGameAuctionIfAuctionExists(){
-        Auction auction = expectedGame.getAuction();
+        Mono<Auction> auctionMono = auctionRepository.findAuctionByGame(expectedGame);
 
         client
                 .post()
                 .uri("/{id}/add-auction", expectedGame.getId())
-                .body(fromObject(auction))
+                .body(auctionMono ,Auction.class)
                 .exchange()
                 .expectStatus()
                 .isEqualTo(HttpStatus.BAD_REQUEST);
