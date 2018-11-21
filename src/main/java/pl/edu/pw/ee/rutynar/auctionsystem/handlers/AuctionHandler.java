@@ -2,7 +2,6 @@ package pl.edu.pw.ee.rutynar.auctionsystem.handlers;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.connection.Server;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,14 +14,17 @@ import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.User;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.AuctionRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.BidRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.services.UserService;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 
 @Component
@@ -123,10 +125,25 @@ public class AuctionHandler {
 
         return auctionMono
                 .filter(auction -> auction.getBids() != null)
+                .map(Auction::getBids)
                 .flatMap(bids -> ServerResponse.ok()
                     .contentType(APPLICATION_JSON)
                     .body(fromObject(bids))
                 ).switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    public Mono<ServerResponse> getAuctionBidsSSE(ServerRequest request){
+        ObjectId auctionId = new ObjectId(request.pathVariable("id"));
+        Mono<Auction> auctionMono = auctionRepository.findById(auctionId);
+
+        Flux<Bid> bidFlux = auctionMono
+                .map(Auction::getBids)
+                .flux()
+                .flatMap(Flux::fromIterable);
+
+        return ServerResponse.ok()
+                .contentType(TEXT_EVENT_STREAM)
+                .body(bidFlux, Bid.class);
     }
 
     // For now auctions won't be deleted
