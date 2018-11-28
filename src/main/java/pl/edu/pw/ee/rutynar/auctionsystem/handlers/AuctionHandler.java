@@ -13,6 +13,8 @@ import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Bid;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.User;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.AuctionRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.BidRepository;
+import pl.edu.pw.ee.rutynar.auctionsystem.events.BidPostedEvent;
+import pl.edu.pw.ee.rutynar.auctionsystem.events.BidPostedEventPublisher;
 import pl.edu.pw.ee.rutynar.auctionsystem.services.AuctionService;
 import pl.edu.pw.ee.rutynar.auctionsystem.services.UserService;
 import reactor.core.publisher.Flux;
@@ -42,6 +44,9 @@ public class AuctionHandler {
 
     @Autowired
     private AuctionService auctionService;
+
+    @Autowired
+    private BidPostedEventPublisher eventPublisher;
 
     public Mono<ServerResponse> getAuction(ServerRequest request) {
         ObjectId id = new ObjectId(request.pathVariable("id"));
@@ -129,9 +134,13 @@ public class AuctionHandler {
                 .flux()
                 .flatMap(Flux::fromIterable);
 
+        Flux<Bid> publish = Flux
+                .create(this.eventPublisher)
+                .map(event -> (Bid) event.getSource());
+
         return ServerResponse.ok()
                 .contentType(TEXT_EVENT_STREAM)
-                .body(bidFlux, Bid.class);
+                .body(bidFlux.concatWith(publish).share(), Bid.class);
     }
 
     // For now auctions won't be deleted

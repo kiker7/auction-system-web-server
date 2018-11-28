@@ -50,7 +50,7 @@ public class AuctionServiceImpl implements AuctionService {
                         auction.setBids(new ArrayList<>());
                     }
                     auction.getBids().add(bid);
-                    return auctionRepository.save(auction).doOnSuccess(auction1 -> this.publisher.publishEvent(new BidPostedEvent(auction1)));
+                    return auctionRepository.save(auction).doOnSuccess(auction1 -> this.publisher.publishEvent(new BidPostedEvent(bid)));
                 });
     }
 }

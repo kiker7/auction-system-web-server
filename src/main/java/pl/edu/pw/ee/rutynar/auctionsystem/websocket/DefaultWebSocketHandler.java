@@ -50,7 +50,5 @@ public class DefaultWebSocketHandler extends AbstractWebSocketHandler {
                 });
 
         return webSocketSession.send(messageFlux);
-
-//        return webSocketSession.send(webSocketSession.receive().doOnNext(WebSocketMessage::retain).share().delayElements(Duration.ofSeconds(1)));
     }
 }
