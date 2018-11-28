@@ -17,7 +17,7 @@
     </p>
 
     <p>
-        Output<br />
+        Output new<br />
     <div id="output"></div>
     </p>
 </div>
@@ -34,7 +34,7 @@
 
 <script type="application/javascript">
 
-    var token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuZXctdXNlcjEiLCJhdWQiOiJ1bmtub3duIiwiZXhwIjoyMTQ3NTUzOTMyLCJpYXQiOjE1NDI3NTM5MzJ9.scHMoVSlSoUn5zhD9uH26VZlnxnzWKxNn-CmuioKjhrd6xQRMC7oZ11C_oFGograXdKEv-f-GyfcFKVGNHjj3g";
+    var token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuZXctdXNlcjEiLCJhdWQiOiJ1bmtub3duIiwiZXhwIjoyMTQ4MjEwNzQxLCJpYXQiOjE1NDM0MTA3NDF9.He05EsqODpBwfqXbnNXm88EkUHKH60K4Y0LNy3xes5etCLPxKa18lEpCGOiJdBVEvgdPxn2XBq0_Um8GtY_Tgw";
 
     var socket = new WebSocket("ws://localhost:8090/api/ws/notifications?token=" + token);
 

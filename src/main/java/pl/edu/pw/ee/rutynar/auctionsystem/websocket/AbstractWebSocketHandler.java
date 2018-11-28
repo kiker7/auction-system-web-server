@@ -1,11 +1,14 @@
 package pl.edu.pw.ee.rutynar.auctionsystem.websocket;
 
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import pl.edu.pw.ee.rutynar.auctionsystem.config.security.JwtAuthenticationToken;
+import pl.edu.pw.ee.rutynar.auctionsystem.events.BidPostedEventPublisher;
 import reactor.core.publisher.Mono;
 
 import java.security.Principal;

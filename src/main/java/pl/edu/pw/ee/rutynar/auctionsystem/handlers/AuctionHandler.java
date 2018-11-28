@@ -13,6 +13,7 @@ import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Bid;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.User;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.AuctionRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.BidRepository;
+import pl.edu.pw.ee.rutynar.auctionsystem.services.AuctionService;
 import pl.edu.pw.ee.rutynar.auctionsystem.services.UserService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -38,6 +39,9 @@ public class AuctionHandler {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AuctionService auctionService;
 
     public Mono<ServerResponse> getAuction(ServerRequest request) {
         ObjectId id = new ObjectId(request.pathVariable("id"));
@@ -74,28 +78,12 @@ public class AuctionHandler {
 
     public Mono<ServerResponse> addAuctionBid(ServerRequest request) {
         ObjectId auctionId = new ObjectId(request.pathVariable("id"));
-
         Mono<Bid> bidMono = request.bodyToMono(Bid.class);
-        Mono<Auction> auctionMono = auctionRepository.findById(auctionId);
-        Mono<User> userMono = userService.getCurrentUser();
 
-        return bidMono
-                .zipWith(userMono, (bid, user) -> {
-                    bid.setUser(user);
-                    bid.setRequestTime(new Date());
-                    return bidRepository.save(bid);
-                })
-                .flatMap(bids -> bids.map(bid -> bid))
-                .zipWith(auctionMono, (bid, auction) -> {
-                    if (auction.getBids() == null) {
-                        auction.setBids(new ArrayList<>());
-                    }
-                    auction.getBids().add(bid);
-                    return auctionRepository.save(auction);
-                })
+        return auctionService.addBidToAuction(bidMono, auctionId)
                 .flatMap(val -> ServerResponse.status(HttpStatus.CREATED)
-                    .contentType(APPLICATION_JSON)
-                    .body(val, Auction.class)
+                        .contentType(APPLICATION_JSON)
+                        .body(val, Auction.class)
                 ).switchIfEmpty(ServerResponse.notFound().build());
     }
 
