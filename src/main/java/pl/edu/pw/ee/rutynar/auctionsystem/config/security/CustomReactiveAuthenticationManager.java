@@ -60,10 +60,10 @@ public class CustomReactiveAuthenticationManager implements ReactiveAuthenticati
             String username = jwtPreAuthenticationToken.getUsername();
             String bearerRequestHeader = jwtPreAuthenticationToken.getBearerRequestHeader();
 
-            log.info("Checking authentication for user: " + username);
+//            log.info("Checking authentication for user: " + username);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 if (jwtTokenUtil.validateToken(authToken)) {
-                    log.info("Authenticated user: " + username + " setting security context");
+                    log.info("Authenticated user: " + username);
                     return this.userDetailsService.findByUsername(username);
                 }
             }

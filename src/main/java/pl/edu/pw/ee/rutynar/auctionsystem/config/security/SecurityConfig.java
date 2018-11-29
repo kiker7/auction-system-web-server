@@ -19,7 +19,8 @@ public class SecurityConfig {
     private static final String[] AUTH_WHITELIST = {
             "/resources/**",
             "/auth/**",
-            "/test/ws"
+            "/test/**",
+            "/api/auction/**" // ONLY FOR TEST
     };
 
     @Bean

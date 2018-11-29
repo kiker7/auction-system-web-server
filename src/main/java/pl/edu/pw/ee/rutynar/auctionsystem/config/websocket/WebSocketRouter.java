@@ -42,6 +42,7 @@ public class WebSocketRouter {
         return new HandshakeWebSocketService(new ReactorNettyRequestUpgradeStrategy());
     }
 
+    // TODO: change
     @Bean
     Executor executor(){
         return Executors.newSingleThreadExecutor();
