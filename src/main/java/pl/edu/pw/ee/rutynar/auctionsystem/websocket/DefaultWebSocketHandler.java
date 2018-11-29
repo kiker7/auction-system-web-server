@@ -20,35 +20,37 @@ import java.util.Arrays;
 @Slf4j
 public class DefaultWebSocketHandler extends AbstractWebSocketHandler {
 
-    private BidPostedEventPublisher eventPublisher;
+//    private BidPostedEventPublisher eventPublisher;
 
     public DefaultWebSocketHandler(BidPostedEventPublisher eventPublisher) {
         this.authorizedRoles.addAll(Arrays.asList(Role.USER.toString(), Role.ADMIN.toString()));
-        this.eventPublisher = eventPublisher;
+//        this.eventPublisher = eventPublisher;
     }
 
     @Override
     Mono<Void> doHandle(WebSocketSession webSocketSession) {
 
-        ObjectMapper objectMapper = new ObjectMapper();
+//        ObjectMapper objectMapper = new ObjectMapper();
+//
+//        Flux<BidPostedEvent> publish = Flux
+//                .create(this.eventPublisher)
+//                .share();
+//
+//        Flux<WebSocketMessage> messageFlux = publish
+//                .map(event -> {
+//                    try{
+//                        return objectMapper.writeValueAsString(event.getSource());
+//                    }catch (JsonProcessingException e){
+//                        throw new RuntimeException(e);
+//                    }
+//                })
+//                .map(str -> {
+//                    log.info("Sending... : " + str);
+//                    return webSocketSession.textMessage(str);
+//                });
 
-        Flux<BidPostedEvent> publish = Flux
-                .create(this.eventPublisher)
-                .share();
+//        return webSocketSession.send(messageFlux);
 
-        Flux<WebSocketMessage> messageFlux = publish
-                .map(event -> {
-                    try{
-                        return objectMapper.writeValueAsString(event.getSource());
-                    }catch (JsonProcessingException e){
-                        throw new RuntimeException(e);
-                    }
-                })
-                .map(str -> {
-                    log.info("Sending... : " + str);
-                    return webSocketSession.textMessage(str);
-                });
-
-        return webSocketSession.send(messageFlux);
+        return webSocketSession.send(webSocketSession.receive().doOnNext(WebSocketMessage::retain).share().delayElements(Duration.ofSeconds(1)));
     }
 }

@@ -130,7 +130,8 @@ public class AuctionHandler {
 
         return ServerResponse.ok()
                 .contentType(TEXT_EVENT_STREAM)
-                .body(auctionService.getAuctionPublishedBids(auctionId), Bid.class);
+                .body(auctionService.getAuctionPublishedBids(auctionId), Bid.class)
+                .switchIfEmpty(ServerResponse.notFound().build());
     }
 
     // For now auctions won't be deleted

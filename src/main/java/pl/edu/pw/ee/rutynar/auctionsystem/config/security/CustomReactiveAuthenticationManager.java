@@ -63,7 +63,7 @@ public class CustomReactiveAuthenticationManager implements ReactiveAuthenticati
 //            log.info("Checking authentication for user: " + username);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 if (jwtTokenUtil.validateToken(authToken)) {
-                    log.info("Authenticated user: " + username);
+//                    log.info("Authenticated user: " + username);
                     return this.userDetailsService.findByUsername(username);
                 }
             }

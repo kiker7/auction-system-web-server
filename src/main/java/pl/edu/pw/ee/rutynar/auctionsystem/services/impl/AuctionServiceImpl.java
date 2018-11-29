@@ -49,30 +49,6 @@ public class AuctionServiceImpl implements AuctionService {
         this.publishersMap = new HashMap<>();
     }
 
-    private Flux<Bid> getAuctionBidsPublisher(ObjectId id) {
-        if (!this.publishersMap.containsKey(id)) {
-            Flux<BidPostedEvent> emitter = Flux
-                    .create(fluxSink -> this.executor.execute(() -> {
-                        while (true) {
-                            try {
-                                BidPostedEvent event = this.eventPublisher.getAuctionQueue(id).take();
-                                fluxSink.next(event);
-                            } catch (InterruptedException e) {
-                                ReflectionUtils.rethrowRuntimeException(e);
-                            }
-                        }
-                    }));
-            Flux<Bid> publisher = emitter
-                    .map(event -> (Bid) event.getSource())
-                    .doOnSubscribe(s -> log.debug("OnSubscribe AUCTION: " + id))
-                    .doOnComplete(() -> log.debug("OnComplete AUCTION: " + id))
-                    .doOnCancel(() -> log.debug("OnCancel AUCTION: " + id))
-                    .publish().refCount(1, Duration.ofDays(1));
-            this.publishersMap.put(id, publisher);
-        }
-        return this.publishersMap.get(id);
-    }
-
     @Override
     public Mono<Mono<Auction>> addBidToAuction(Mono<Bid> bidMono, ObjectId auctionId) {
 
@@ -108,5 +84,29 @@ public class AuctionServiceImpl implements AuctionService {
                 .flux()
                 .flatMap(Flux::fromIterable)
                 .concatWith(getAuctionBidsPublisher(auctionId));
+    }
+
+    private Flux<Bid> getAuctionBidsPublisher(ObjectId id) {
+        if (!this.publishersMap.containsKey(id)) {
+            Flux<BidPostedEvent> emitter = Flux
+                    .create(fluxSink -> this.executor.execute(() -> {
+                        while (true) {
+                            try {
+                                BidPostedEvent event = this.eventPublisher.getAuctionQueue(id).take();
+                                fluxSink.next(event);
+                            } catch (InterruptedException e) {
+                                ReflectionUtils.rethrowRuntimeException(e);
+                            }
+                        }
+                    }));
+            Flux<Bid> publisher = emitter
+                    .map(event -> (Bid) event.getSource())
+                    .doOnSubscribe(s -> log.debug("OnSubscribe AUCTION: " + id))
+                    .doOnComplete(() -> log.debug("OnComplete AUCTION: " + id))
+                    .doOnCancel(() -> log.debug("OnCancel AUCTION: " + id))
+                    .publish().refCount(1, Duration.ofDays(1));
+            this.publishersMap.put(id, publisher);
+        }
+        return this.publishersMap.get(id);
     }
 }
