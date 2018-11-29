@@ -1,4 +1,4 @@
-package pl.edu.pw.ee.rutynar.auctionsystem.websocket;
+package pl.edu.pw.ee.rutynar.auctionsystem.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,5 +11,10 @@ public class TestController {
     @GetMapping("/ws")
     public String websocket(){
         return "websocket";
+    }
+
+    @GetMapping("/bids-sse")
+    public String bidSSE() {
+        return "bids-sse";
     }
 }

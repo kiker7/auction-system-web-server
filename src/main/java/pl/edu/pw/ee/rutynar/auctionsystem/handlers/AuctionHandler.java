@@ -2,6 +2,7 @@ package pl.edu.pw.ee.rutynar.auctionsystem.handlers;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import pl.edu.pw.ee.rutynar.auctionsystem.services.UserService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.swing.plaf.synth.SynthTextAreaUI;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -30,6 +32,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 
+@Slf4j
 @Component
 public class AuctionHandler {
 
@@ -44,9 +47,6 @@ public class AuctionHandler {
 
     @Autowired
     private AuctionService auctionService;
-
-    @Autowired
-    private BidPostedEventPublisher eventPublisher;
 
     public Mono<ServerResponse> getAuction(ServerRequest request) {
         ObjectId id = new ObjectId(request.pathVariable("id"));
@@ -127,20 +127,10 @@ public class AuctionHandler {
 
     public Mono<ServerResponse> getAuctionBidsSSE(ServerRequest request){
         ObjectId auctionId = new ObjectId(request.pathVariable("id"));
-        Mono<Auction> auctionMono = auctionRepository.findById(auctionId);
-
-        Flux<Bid> bidFlux = auctionMono
-                .map(Auction::getBids)
-                .flux()
-                .flatMap(Flux::fromIterable);
-
-        Flux<Bid> publish = Flux
-                .create(this.eventPublisher)
-                .map(event -> (Bid) event.getSource());
 
         return ServerResponse.ok()
                 .contentType(TEXT_EVENT_STREAM)
-                .body(bidFlux.concatWith(publish).share(), Bid.class);
+                .body(auctionService.getAuctionPublishedBids(auctionId), Bid.class);
     }
 
     // For now auctions won't be deleted

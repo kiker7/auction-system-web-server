@@ -2,52 +2,50 @@ package pl.edu.pw.ee.rutynar.auctionsystem.events;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
+import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Auction;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Bid;
-import reactor.core.publisher.FluxSink;
+import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.AuctionRepository;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Consumer;
 
 @Slf4j
 @Component
-public class BidPostedEventPublisher implements ApplicationListener<BidPostedEvent> , Consumer<FluxSink<BidPostedEvent>> {
+public class BidPostedEventPublisher {
 
 
-    // queue Map: auctionId <-> queue
-//    private Map<ObjectId, BlockingQueue<BidPostedEvent>> auctionQueueMap;
+    private Map<ObjectId, BlockingQueue<BidPostedEvent>> auctionQueueMap = new HashMap<>();
 
+    @Autowired
+    private AuctionRepository auctionRepository;
 
-    private final Executor executor;
-    private final BlockingQueue<BidPostedEvent> queue = new LinkedBlockingQueue<>();
-
-    public BidPostedEventPublisher(Executor executor) {
-        this.executor = executor;
+    public BlockingQueue<BidPostedEvent> getAuctionQueue(ObjectId id) {
+        if (!this.auctionQueueMap.containsKey(id)) {
+            this.auctionQueueMap.put(id, new LinkedBlockingQueue<>());
+            log.debug("Created new Queue for auction: " + id);
+        }
+        return this.auctionQueueMap.get(id);
     }
 
-    @Override
+    @Async("threadPoolTaskExecutor")
+    @EventListener
     public void onApplicationEvent(BidPostedEvent event) {
-        log.info("EVENT: NEW BID");
-        this.queue.offer(event);
-    }
-
-    @Override
-    public void accept(FluxSink<BidPostedEvent> bidPostedEventFluxSink) {
-
-        this.executor.execute(() ->{
-            while (true){
-                try{
-                    BidPostedEvent event = queue.take();
-                    bidPostedEventFluxSink.next(event);
-                }catch (InterruptedException e){
-                    ReflectionUtils.rethrowRuntimeException(e);
-                }
-            }
-        });
+        auctionRepository.findAuctionByBids((Bid) event.getSource())
+                .map(Auction::getId)
+                .subscribe(id -> {
+                    if (!this.auctionQueueMap.containsKey(id)) {
+                        this.auctionQueueMap.put(id, new LinkedBlockingQueue<>());
+                        log.debug("Created new queue for auction: " + id);
+                    }
+                    this.auctionQueueMap.get(id).offer(event);
+                    log.debug("EVENT: " + event.getSource());
+                });
     }
 }
