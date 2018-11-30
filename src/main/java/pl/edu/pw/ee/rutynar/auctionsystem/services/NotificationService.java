@@ -10,5 +10,5 @@ public interface NotificationService {
 
     Flux<Notification> getUserPublishedNotifications(ObjectId userId);
 
-    void createNotification(User recipient, NotificationType type);
+    void createNotification(User recipient, NotificationType type, Object payload);
 }

@@ -48,16 +48,16 @@ public class BidPostedEventPublisher {
                         this.auctionQueueMap.put(id, new LinkedBlockingQueue<>());
                     }
                     this.auctionQueueMap.get(id).offer(event);
-                    this.notifyAuctionFollowers(id);
+                    this.notifyAuctionFollowers(id, event.getSource());
                 });
     }
 
-    private void notifyAuctionFollowers(ObjectId auctionId){
+    private void notifyAuctionFollowers(ObjectId auctionId, Object payload){
         auctionRepository.findById(auctionId)
                 .map(Auction::getFollowers)
                 .flux()
                 .flatMap(Flux::fromIterable)
-                .doOnNext(user -> this.notificationService.createNotification(user, NotificationType.POSTED_BID))
+                .doOnNext(user -> this.notificationService.createNotification(user, NotificationType.POSTED_BID, payload))
                 .subscribe();
     }
 }

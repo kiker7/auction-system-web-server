@@ -5,10 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
-import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Bid;
-import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Notification;
-import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.NotificationType;
-import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.User;
+import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.*;
+import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.AuctionRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.NotificationRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.UserRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.events.UserNotificationEvent;
@@ -35,6 +33,9 @@ public class NotificationServiceImpl implements NotificationService {
     private UserRepository userRepository;
 
     @Autowired
+    private AuctionRepository auctionRepository;
+
+    @Autowired
     Executor executor;
 
     public NotificationServiceImpl(NotificationRepository notificationRepository, ApplicationEventPublisher publisher) {
@@ -52,29 +53,26 @@ public class NotificationServiceImpl implements NotificationService {
                 .concatWith(getUserNotificationPublisher(userId));
     }
 
-    // TODO: change message
     @Override
-    public void createNotification(User recipient, NotificationType type) {
+    public void createNotification(User recipient, NotificationType type, Object payload) {
         Notification notification = new Notification();
         notification.setRecipient(recipient);
-        String message;
+        Mono<Notification> notificationMono = notificationRepository.save(notification);
         switch (type){
             case POSTED_BID:
-                message = "New posted bid";
+                Bid newPostedBid = (Bid) payload;
+                auctionRepository.findAuctionByBids(newPostedBid)
+                        .doOnNext(auction -> notification.setMessage("New posted offer [" + newPostedBid.getOffer() + "$] for game: " + auction.getGame().getName()))
+                        .then(notificationMono)
+                        .subscribe(n -> this.publisher.publishEvent(new UserNotificationEvent(n)));
                 break;
             case AUCTION_CREATE:
-                message = "Auction create";
+                notification.setMessage("Auction create");
                 break;
             case AUCTION_FINISH:
-                message = "Auction finish";
+                notification.setMessage("Auction finish");
                 break;
-            default:
-                message = "Default notification";
         }
-        notification.setMessage(message);
-
-        notificationRepository.save(notification)
-                .subscribe(n -> this.publisher.publishEvent(new UserNotificationEvent(n)));
     }
 
     private Flux<Notification> getUserNotificationPublisher(ObjectId id){
