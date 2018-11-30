@@ -71,7 +71,6 @@ public class AuctionServiceImpl implements AuctionService {
                 });
     }
 
-
     /**
      * Return Flux with all bids from auction and concat new posted bids, used for SSE
      */

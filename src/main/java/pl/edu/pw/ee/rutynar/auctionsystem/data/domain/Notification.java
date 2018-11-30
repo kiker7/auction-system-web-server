@@ -1,5 +1,6 @@
 package pl.edu.pw.ee.rutynar.auctionsystem.data.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class Notification {
     @Id
     private ObjectId id;
 
+    @JsonIgnore
     @DBRef
     private User recipient;
 

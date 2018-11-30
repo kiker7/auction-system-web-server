@@ -1,34 +1,30 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
-    <title>Test websocket</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Auction Bids SSE - Test</title>
 </head>
 <body>
 
-<div class="container wrapper">
-    <p>Auction Bids</p>
-    <div>
-        <input type="text" class="form-control" id="auctionId">
-        <button id="changeAuctionButton">Change auction</button>
+<div class="container">
+    <h4>Auction bids as Server-Sent-Events</h4>
+    <div class="p-4">
+        <input type="text" class="form-control " style="width: 50%;" id="auctionId" placeholder="Auction ID">
+        <button id="changeAuctionButton" class="btn btn-primary mt-3">Change auction</button>
     </div>
-    <p>
-        Output <br />
-    <div id="output"></div>
-    </p>
+    <div>
+        <h4>Offers:</h4>
+        <div id="output"></div>
+    </div>
 </div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script type="application/javascript">
-
     $(function () {
-
         var pref = "http://localhost:8090/api/auction/";
         var suff = "/bid-sse";
         var source = new EventSource(pref);
@@ -41,25 +37,13 @@
             var id = $("#auctionId").val();
             source = new EventSource(pref + id + suff);
             source.onopen = function (evt) {
-              console.log("Opened sse");
+                console.log("Opened sse");
             };
             source.onmessage = function (evt) {
                 output.innerHTML = output.innerHTML + ('<p>' + evt.data + '</p>');
             };
         });
     });
-
-    // if(typeof(EventSource) !== "undefined"){
-    //     var output = document.getElementById("output");
-    //     var source = new EventSource("http://localhost:8090/api/auction/5beeffa145c97f7057b98fdc/bid-sse");
-    //     source.onmessage = function (evt) {
-    //         output.innerHTML = output.innerHTML + ('<p>' + evt.data + '</p>');
-    //     }
-    //
-    // }
-
-
-
 </script>
 </body>
 </html>
