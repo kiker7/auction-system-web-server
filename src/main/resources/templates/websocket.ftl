@@ -34,7 +34,7 @@
 
 <script type="application/javascript">
 
-    var token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuZXctdXNlcjEiLCJhdWQiOiJ1bmtub3duIiwiZXhwIjoyMTQ4MjEwNzQxLCJpYXQiOjE1NDM0MTA3NDF9.He05EsqODpBwfqXbnNXm88EkUHKH60K4Y0LNy3xes5etCLPxKa18lEpCGOiJdBVEvgdPxn2XBq0_Um8GtY_Tgw";
+    var token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuZXctdXNlcjIiLCJhdWQiOiJ1bmtub3duIiwiZXhwIjoyMTQ4MjE4NTA3LCJpYXQiOjE1NDM0MTg1MDd9.UtMiSw8gpsI5N4P8fOQ4jI5bmcwOG5qXuIC6fhwjaSrmCsWfpSYzwPygS9E9bJBT0eWpDuHC1DMfQXrZwnPv5A";
 
     var socket = new WebSocket("ws://localhost:8090/api/ws/notifications?token=" + token);
 

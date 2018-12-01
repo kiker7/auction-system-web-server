@@ -17,4 +17,9 @@ public class TestController {
     public String bidSSE() {
         return "bids-sse";
     }
+
+    @GetMapping("/notifications")
+    public String userNotifications(){
+        return "user-notifications-demo";
+    }
 }

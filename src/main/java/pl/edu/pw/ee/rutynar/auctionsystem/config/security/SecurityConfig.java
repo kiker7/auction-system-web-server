@@ -20,7 +20,8 @@ public class SecurityConfig {
             "/resources/**",
             "/auth/**",
             "/test/**",
-            "/api/auction/**" // ONLY FOR TEST
+            "/api/auction/**",// ONLY FOR TEST
+            "/api/notifications/**"
     };
 
     @Bean
