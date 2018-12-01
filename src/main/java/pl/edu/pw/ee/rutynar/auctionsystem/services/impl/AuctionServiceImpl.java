@@ -8,21 +8,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Auction;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.Bid;
+import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.NotificationType;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.domain.User;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.AuctionRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.data.repository.BidRepository;
 import pl.edu.pw.ee.rutynar.auctionsystem.events.BidPostedEvent;
 import pl.edu.pw.ee.rutynar.auctionsystem.events.BidPostedEventPublisher;
 import pl.edu.pw.ee.rutynar.auctionsystem.services.AuctionService;
+import pl.edu.pw.ee.rutynar.auctionsystem.services.NotificationService;
 import pl.edu.pw.ee.rutynar.auctionsystem.services.UserService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 @Slf4j
@@ -38,6 +37,9 @@ public class AuctionServiceImpl implements AuctionService {
 
     @Autowired
     private Executor executor;
+
+    @Autowired
+    private NotificationService notificationService;
 
 
     public AuctionServiceImpl(ApplicationEventPublisher publisher, BidRepository bidRepository, AuctionRepository auctionRepository, UserService userService, BidPostedEventPublisher eventPublisher) {
@@ -101,11 +103,32 @@ public class AuctionServiceImpl implements AuctionService {
             Flux<Bid> publisher = emitter
                     .map(event -> (Bid) event.getSource())
                     .doOnSubscribe(s -> log.debug("OnSubscribe AUCTION: " + id))
-                    .doOnComplete(() -> log.debug("OnComplete AUCTION: " + id))
+                    .doOnComplete(() -> this.closeAuction(id))
                     .doOnCancel(() -> log.debug("OnCancel AUCTION: " + id))
                     .publish().refCount(1, Duration.ofDays(1));
             this.publishersMap.put(id, publisher);
         }
         return this.publishersMap.get(id);
+    }
+
+    private void closeAuction(ObjectId auctionId){
+        auctionRepository.findById(auctionId)
+                .map(auction -> {
+                    auction.setFinished(true);
+                    return auction;
+                })
+                .map(auction -> {
+                    auction.getBids()
+                            .stream()
+                            .max(Comparator.comparing(Bid::getOffer))
+                            .ifPresent(bid -> {
+                                auction.setOwner(bid.getUser());
+                                auction.getFollowers().forEach(user -> notificationService.createNotification(user, NotificationType.AUCTION_FINISH, auction));
+                                // Send notification to winner
+                                this.notificationService.createNotification(bid.getUser(), NotificationType.AUCTION_WIN, auction);
+                            });
+                    return auctionRepository.save(auction);
+                })
+                .subscribe();
     }
 }

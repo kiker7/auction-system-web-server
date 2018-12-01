@@ -66,11 +66,15 @@ public class NotificationServiceImpl implements NotificationService {
                         .then(notificationMono)
                         .subscribe(n -> this.publisher.publishEvent(new UserNotificationEvent(n)));
                 break;
-            case AUCTION_CREATE:
-                notification.setMessage("Auction create");
-                break;
             case AUCTION_FINISH:
-                notification.setMessage("Auction finish");
+                Auction auction = (Auction) payload;
+                notification.setMessage("Auction: " + auction.getId() + " has finished.");
+                notificationMono.subscribe(n -> this.publisher.publishEvent(new UserNotificationEvent(n)));
+                break;
+            case AUCTION_WIN:
+                Auction auctn = (Auction) payload;
+                notification.setMessage("You are winner! Game: " + auctn.getGame().getName() + " has been added to your library!");
+                notificationMono.subscribe(n -> this.publisher.publishEvent(new UserNotificationEvent(n)));
                 break;
         }
     }
