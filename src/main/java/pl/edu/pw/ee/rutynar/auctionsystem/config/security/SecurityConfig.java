@@ -20,6 +20,7 @@ public class SecurityConfig {
             "/resources/**",
             "/auth/**",
             "/test/**",
+            "/actuator/**",
             "/api/auction/**",// ONLY FOR TEST
             "/api/notifications/**"
     };
